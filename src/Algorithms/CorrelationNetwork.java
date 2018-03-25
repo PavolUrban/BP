@@ -87,11 +87,7 @@ public static final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
             vertices[i] = new Vertex(i);
             graph.addVertex(vertices[i]);
         }
-        
-        
-        
-        
-        
+     
         
         
         int constantPointer=0; //to select from array Left segment <Ti> part

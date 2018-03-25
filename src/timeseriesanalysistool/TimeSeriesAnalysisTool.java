@@ -82,6 +82,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcType;
 import javafx.scene.text.Font;
+import javafx.scene.transform.Affine;
+import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
@@ -740,12 +742,7 @@ public class TimeSeriesAnalysisTool extends Application {
             
         Platform.runLater(new Runnable() {
             @Override
-            public void run() {
-              
-                 for (Vertex v : network.getVertices()) {
-                    drawVertex(gc, v, Color.CHARTREUSE); //skontrolovat ci je spravne
-                }
-                 
+            public void run() {   
                  for (Edge e : network.getEdges())
                  {
                       Pair<Vertex> p = network.getEndpoints(e);
@@ -753,8 +750,30 @@ public class TimeSeriesAnalysisTool extends Application {
                         Vertex v2 = p.getSecond();
                         drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), 0.1, Color.BLACK);
                  }
+                 
+                  for (Vertex v : network.getVertices()) {
+                    drawVertex(gc, v, Color.CHARTREUSE); //skontrolovat ci je spravne
+                }
+                  
+                 
                }
         });
     }
      
+     
+     void drawArrow(GraphicsContext gc, int x1, int y1, int x2, int y2) {
+    gc.setFill(Color.BLACK);
+int ARR_SIZE=8;
+    double dx = x2 - x1, dy = y2 - y1;
+    double angle = Math.atan2(dy, dx);
+    int len = (int) Math.sqrt(dx * dx + dy * dy);
+
+    Transform transform = Transform.translate(x1, y1);
+    transform = transform.createConcatenation(Transform.rotate(Math.toDegrees(angle), 0, 0));
+    gc.setTransform(new Affine(transform));
+
+    gc.strokeLine(0, 0, len, 0);
+    gc.fillPolygon(new double[]{len, len - ARR_SIZE, len - ARR_SIZE, len}, new double[]{0, -ARR_SIZE, ARR_SIZE, 0},
+            4);
+}
 }
