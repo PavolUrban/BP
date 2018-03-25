@@ -8,7 +8,7 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="TimeSeriesAnalysisTool.jar" size="47168" download="eager" />
+    <jar href="TimeSeriesAnalysisTool.jar" size="48188" download="eager" />
     <jar href="lib\collections-generic-4.01.jar" size="531557" download="eager" />
     <jar href="lib\colt-1.2.0.jar" size="581945" download="eager" />
     <jar href="lib\concurrent-1.3.4.jar" size="189284" download="eager" />

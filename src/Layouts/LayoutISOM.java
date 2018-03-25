@@ -23,7 +23,7 @@ public class LayoutISOM extends Layout{
     public void runLayout(Graph<Vertex, Edge> network) {
        
         ISOMLayout layout = new ISOMLayout(network);
-        int requiredOperations = 2000;
+        int requiredOperations = 1000;
         
         layout.initialize();
         DefaultVisualizationModel<Integer,Integer> model = new DefaultVisualizationModel<>(layout, new Dimension(Design.canvasWidth, Design.canvasHeight));

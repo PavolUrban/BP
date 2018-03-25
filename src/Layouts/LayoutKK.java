@@ -21,7 +21,7 @@ public class LayoutKK  extends Layout{
      @Override
     public void runLayout(Graph<Vertex, Edge> network) {
        
-        int requiredOperations = 500;
+        int requiredOperations = 400;
         KKLayout layout = new KKLayout(network);
         layout.initialize();
         DefaultVisualizationModel<Integer,Integer> model = new DefaultVisualizationModel<>(layout, new Dimension(Design.canvasWidth,Design.canvasHeight));

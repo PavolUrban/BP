@@ -5,6 +5,7 @@
  */
 package timeseriesanalysistool;
 
+import Actions.Actions;
 import Algorithms.CorrelationNetwork;
 import Algorithms.NVG;
 import Layouts.Layout;
@@ -105,6 +106,7 @@ public class TimeSeriesAnalysisTool extends Application {
     Button buttonChooseSeries1 = new Button("Add Time Series files into Group 1...");
     Button buttonClearGroup1 = new Button("Clear list of series of Group 1");
     Button buttonClearGroup2 = new Button("Clear list of series of Group 2");
+    Button buttonSaveNetworkAsPNG = new Button ("Save network as PNG");
     Button buttonChooseSeries2 = new Button("Add Time Series files into Group 2...");
     Label labelgroup1 = new Label("Group 1");
     Label labelgroup2 = new Label("Group 2");
@@ -119,6 +121,7 @@ public class TimeSeriesAnalysisTool extends Application {
    
     //File[] files;
     Stage loadingStage;
+    
     Label labelWaitPlease;
     Boolean networkIsNull = true;
 
@@ -189,7 +192,6 @@ public class TimeSeriesAnalysisTool extends Application {
     @Override
     public void start(Stage primaryStage) {
         Group root = new Group();
-
         Scene scene = new Scene(root, Design.sceneWidth, Design.sceneHeight);
 
         primaryStage.setTitle("Time Series Analysis Tool");
@@ -290,7 +292,7 @@ public class TimeSeriesAnalysisTool extends Application {
         final VBox vbox = new VBox();
         vbox.setSpacing(5);
         vbox.setPadding(new Insets(30, 0, 0, 930)); //TODO dynamicky
-        vbox.getChildren().addAll(separator1,labelRange,slider,labelRadioButton,hboxButtons, labelgroup1, hbox, createTable(table, 1), separator2, labelgroup2, hbox2, createTable(table2, 2));
+        vbox.getChildren().addAll(separator1,labelRange,slider,labelRadioButton,hboxButtons, labelgroup1, hbox, createTable(table, 1), separator2, labelgroup2, hbox2, createTable(table2, 2), buttonSaveNetworkAsPNG);
 
         root.getChildren().addAll(vbox);
         
@@ -344,6 +346,13 @@ public class TimeSeriesAnalysisTool extends Application {
             }
 
         });
+        
+          buttonSaveNetworkAsPNG.setOnAction((event) -> {
+            // Button was clicked, do something...
+            Actions a = new Actions();
+            a.saveNetworkAsImage(canvas1, primaryStage);
+          });
+
 
     }
 
@@ -469,6 +478,14 @@ public class TimeSeriesAnalysisTool extends Application {
         exitItem.setOnAction((event) -> {
             Platform.exit();
         });
+        
+       /* MenuItem saveItem = new MenuItem("Save network as PNG", null);
+        saveItem.setMnemonicParsing(true);
+        saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
+        saveItem.setOnAction((event) -> {
+            Actions a = new Actions();
+            a.saveNetworkAsImage(canvas1,transportStage );
+        });*/
         menu2.getItems().add(exitItem);
 
         menu.getMenus().addAll(menuFile,layoutsMenu, menu2);
