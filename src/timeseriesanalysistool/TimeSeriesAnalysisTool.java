@@ -7,10 +7,15 @@ package timeseriesanalysistool;
 
 import Algorithms.CorrelationNetwork;
 import Algorithms.NVG;
+import Layouts.Layout;
+import Layouts.LayoutCircular;
+import Layouts.LayoutISOM;
+import Layouts.LayoutKK;
 import NetworkComponents.Edge;
 import NetworkComponents.Vertex;
 import NetworkMetrics.ThreeVerticesMotifs;
 import cern.colt.map.PrimeFinder;
+import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.util.Pair;
 import java.awt.Graphics2D;
@@ -68,6 +73,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -433,6 +439,26 @@ public class TimeSeriesAnalysisTool extends Application {
         menuFile.getItems().addAll(motifsThreeVertices);
 
         
+        Menu layoutsMenu = new Menu("Layouts");
+        
+        MenuItem itemISOMLayout = new MenuItem("ISOM Layout");
+        itemISOMLayout.setOnAction((event) -> {
+            System.out.println("ISOM layout");
+           runLayout(new LayoutISOM());
+        });
+        
+        MenuItem itemCircularLayout = new MenuItem("Circular Layout");
+        itemCircularLayout.setOnAction((event) -> {
+           runLayout(new LayoutCircular());
+        });
+        
+        MenuItem itemKKLayout = new MenuItem("KK Layout");
+        itemKKLayout.setOnAction((event) -> {
+           runLayout(new LayoutKK());
+        });
+        layoutsMenu.getItems().addAll(itemCircularLayout,itemISOMLayout, itemKKLayout);
+        
+        
         
         Menu menu2 = new Menu("File");
         MenuItem exitItem = new MenuItem("Exit", null);
@@ -443,7 +469,7 @@ public class TimeSeriesAnalysisTool extends Application {
         });
         menu2.getItems().add(exitItem);
 
-        menu.getMenus().addAll(menuFile, menu2);
+        menu.getMenus().addAll(menuFile,layoutsMenu, menu2);
 
         return menu;
 
@@ -682,5 +708,53 @@ public class TimeSeriesAnalysisTool extends Application {
         }
 
     }
+    
+    
+    public void runLayout(final Layout layout){
+        if(network == null)
+            return;
+        
+        Task task = new Task() {
+            @Override
+            protected Object call() throws Exception {
+                layout.runLayout(network);
+                layout.fitToScrean(network);
+                drawNetwork();
+                return null;
+            }
+        };
+        beginTask(task);
+    }
 
+     public void beginTask(Task task){
+        Thread tr = new Thread(task);
+        tr.setDaemon(true);
+        tr.start();
+    }
+     
+     public void drawNetwork(){
+        
+          GraphicsContext gc = canvas1.getGraphicsContext2D();
+            gc.setFill(Color.WHITE);
+            gc.fillRect(0, 0, Design.canvasWidth, Design.canvasHeight);
+            
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+              
+                 for (Vertex v : network.getVertices()) {
+                    drawVertex(gc, v, Color.CHARTREUSE); //skontrolovat ci je spravne
+                }
+                 
+                 for (Edge e : network.getEdges())
+                 {
+                      Pair<Vertex> p = network.getEndpoints(e);
+                        Vertex v = p.getFirst();
+                        Vertex v2 = p.getSecond();
+                        drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), 0.1, Color.BLACK);
+                 }
+               }
+        });
+    }
+     
 }
