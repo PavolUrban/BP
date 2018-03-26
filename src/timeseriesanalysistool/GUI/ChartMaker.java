@@ -50,7 +50,8 @@ public class ChartMaker {
     }
 
     public void createChart(String title, Graph<Vertex, Edge> network, double range) {
-
+        /*Group root = new Group();
+         Scene scene = new Scene(root, Design.sceneWidth, Design.sceneHeight);*/
         ScrollPane scrollPane = new ScrollPane();
 
         startTask(network, range);
@@ -77,11 +78,9 @@ public class ChartMaker {
     }
 
     public void startTask(Graph<Vertex, Edge> network, double range) {
-        // Create a Runnable
-        Runnable task = new Runnable() {
-            public void run() {
-                runTask(network, range);
-            }
+        // Create a Runnable zmenene na lambda expresion
+        Runnable task = () -> {
+            runTask(network, range);
         };
 
         // Run the task in a background thread
@@ -95,7 +94,7 @@ public class ChartMaker {
     public void runTask(Graph<Vertex, Edge> network, double range) {
 
         try {
-                // Get the Status
+            // Get the Status
 
             Betweenness b = new Betweenness(network);
             b.count();
@@ -129,7 +128,7 @@ public class ChartMaker {
                         break;
                     }
                 }
-              //System.out.println("kluc "+ m.getKey()+" hodnota"+ m.getValue());
+                //System.out.println("kluc "+ m.getKey()+" hodnota"+ m.getValue());
 
             }
 
@@ -140,22 +139,28 @@ public class ChartMaker {
                     /* TODO Odstarnit praznde skupiny*/
                     int lowBorder = 0;
                     int rangeINT = (int) range;
-                    
+                    XYChart.Series series1 = new XYChart.Series();
+                    System.out.println();
+
+                    XYChart.Data data = new XYChart.Data<>();
                     for (int i = 0; i < groups.length; i++) {
                         if (groups[i] == 0) {
                             lowBorder = lowBorder + rangeINT;
                             break;
                         } else {
-                            XYChart.Series series1 = new XYChart.Series();
-                            series1.setName("Group " + lowBorder + "-" + borders[i]); //opravit ..ked nevykreslujem vsetko tak je to napicu
-
-                            series1.getData().add(new XYChart.Data("", groups[i]));
-                            bc.getData().add(series1);
+                            //series1.setName("Group " + lowBorder + "-" + borders[i]); //opravit ..ked nevykreslujem vsetko tak je to napicu
+                            data = new XYChart.Data("", groups[i]);
+                            series1.getData().add(data);
+                            System.out.println("Pridavam tuto hodnotu" + groups[i]);
                             lowBorder = lowBorder + rangeINT;
-
                         }
                     }
 
+                    bc.getData().add(series1);
+                    for (int i = 0; i < series1.getData().size(); i++) {
+                        System.out.println(series1.getData().get(i));
+                    }
+                    System.out.println(bc.getData().toString());
                 }
             });
 
@@ -174,6 +179,10 @@ public class ChartMaker {
             borders[i] = rangeINT * times;
             times++;
         }
+    }
+
+    private void kokotinz() {
+
     }
 
 }

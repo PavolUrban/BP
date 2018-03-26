@@ -19,7 +19,6 @@ public abstract class Layout {
     public abstract void runLayout(Graph<Vertex, Edge> network);
     
     public void fitToScrean(Graph<Vertex,Edge> network){
-        System.out.println("Fitting network on a screan");
         double minX = Float.MAX_VALUE, minY = Float.MAX_VALUE, maxX = Float.MIN_VALUE, maxY = Float.MIN_VALUE;
         for(Vertex v : network.getVertices()){
             if(v.getPositionX() < minX){

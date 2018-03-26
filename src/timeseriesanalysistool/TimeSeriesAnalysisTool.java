@@ -17,7 +17,9 @@ import NetworkComponents.Vertex;
 import NetworkMetrics.ThreeVerticesMotifs;
 import cern.colt.map.PrimeFinder;
 import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
+import static edu.uci.ics.jung.graph.util.EdgeType.DIRECTED;
 import edu.uci.ics.jung.graph.util.Pair;
 import java.awt.Graphics2D;
 import java.awt.SplashScreen;
@@ -47,11 +49,13 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
@@ -69,6 +73,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -85,6 +90,7 @@ import javafx.scene.shape.ArcType;
 import javafx.scene.text.Font;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.Transform;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
@@ -106,22 +112,22 @@ public class TimeSeriesAnalysisTool extends Application {
     Button buttonChooseSeries1 = new Button("Add Time Series files into Group 1...");
     Button buttonClearGroup1 = new Button("Clear list of series of Group 1");
     Button buttonClearGroup2 = new Button("Clear list of series of Group 2");
-    Button buttonSaveNetworkAsPNG = new Button ("Save network as PNG");
+    Button buttonSaveNetworkAsPNG = new Button("Save network as PNG");
     Button buttonChooseSeries2 = new Button("Add Time Series files into Group 2...");
     Label labelgroup1 = new Label("Group 1");
     Label labelgroup2 = new Label("Group 2");
-    Label labelRange = new Label("Choose range for metrics");
-    Label labelRadioButton = new Label ("Choose algorithm which you want to use for time series conversion");
+    Label labelRange = new Label("Change critical value");
+    Label labelRadioButton = new Label("Choose algorithm which you want to use for time series conversion");
     Separator separator1 = new Separator();
     Separator separator2 = new Separator();
-    Slider slider = new Slider(5, 50, 5);
-    
-    int radioButtonValue=1;
-    double range =5;
+    Slider slider = new Slider(0.1, 0.9, 0.5);
    
-    //File[] files;
+
+    int radioButtonValue = 1;
+    double criticalValue = 0.5;
+
     Stage loadingStage;
-    
+
     Label labelWaitPlease;
     Boolean networkIsNull = true;
 
@@ -198,7 +204,7 @@ public class TimeSeriesAnalysisTool extends Application {
         primaryStage.setWidth(Design.sceneWidth);
         primaryStage.setHeight(Design.sceneHeight);
 
-        separator1.setMinHeight(50); //TODO ponastavovat dynamicky vsetko
+        separator1.setMinHeight(25); //TODO ponastavovat dynamicky vsetko
         separator1.setVisible(false);
 
         separator2.setMinHeight(25); //TODO ponastavovat dynamicky vsetko
@@ -218,84 +224,108 @@ public class TimeSeriesAnalysisTool extends Application {
         buttonClearGroup2.setMinWidth(Design.minTableWidth / 2 - 2.5);
         hbox2.getChildren().addAll(buttonChooseSeries2, buttonClearGroup2);
 
-        labelgroup1.setFont(new Font("Arial", 20.0));
-        labelgroup2.setFont(new Font("Arial", 20.0));
+        Label label = new Label();
+        Popup popup = new Popup();
+        popup.getContent().add(label);
 
-        
-         final ToggleGroup group = new ToggleGroup();
-          RadioButton rb1 = new RadioButton("NVG");
-        rb1.setToggleGroup(group);
-        rb1.setUserData("NVG");
-
-       
-
-        RadioButton rb2 = new RadioButton("HVG");
-        rb2.setToggleGroup(group);
-       rb1.setUserData("HVG");
-
-
-        RadioButton rb3 = new RadioButton("3rd");
-        rb3.setToggleGroup(group);
-    rb1.setUserData("3rd");
-
-
-        group.selectedToggleProperty().addListener(new ChangeListener<Toggle>(){
-            public void changed(ObservableValue<? extends Toggle> ov,
-                Toggle old_toggle, Toggle new_toggle) {
-                 if (group.getSelectedToggle() != null)
-                 {
-                      if(group.getSelectedToggle()==rb1)
-                      {
-                          radioButtonValue = 1;
-                          System.out.println("Tlacidlo 1");
-                      }
-                      
-                      else if(group.getSelectedToggle() == rb2)
-                      {
-                          radioButtonValue = 2;
-                          System.out.println("Tlacidlo 2");
-                      }
-                      
-                      else
-                      {
-                          radioButtonValue = 3;
-                          System.out.println("Tlacidlo 3");
-                      }
-                 }
-                                    
-            }
-        });
-        
-      
-        slider.setMajorTickUnit(5);
+        double offset = 17;
+        slider.setMajorTickUnit(0.1);
         slider.setMinorTickCount(0);
         slider.setShowTickMarks(true);
         slider.setShowTickLabels(true);
         slider.setSnapToTicks(true);
         slider.setMinHeight(Slider.USE_PREF_SIZE);
-        slider.valueProperty().addListener((obs, oldval, newVal) -> {
-                //code
-            range = slider.getValue();
-            slider.setValue(Math.round(newVal.doubleValue()));
-            System.out.println("Value"+range);
+
+        slider.setOnMouseMoved(e -> {
+            NumberAxis axis = (NumberAxis) slider.lookup(".axis");
+            Point2D locationInAxis = axis.sceneToLocal(e.getSceneX(), e.getSceneY());
+            double mouseX = locationInAxis.getX();
+            double value = axis.getValueForDisplay(mouseX).doubleValue();
+            if (value >= slider.getMin() && value <= slider.getMax()) {
+                label.setText("If you choose larger critical value, there will be more edges between vertices. If you choose lower critical value, there will be less edges between vertices.");
+            }
+
+            popup.setAnchorX(e.getScreenX());
+            popup.setAnchorY(e.getScreenY() + offset);
         });
-       
-        
-        
-         final HBox hboxButtons = new HBox();
+
+        slider.setOnMouseEntered(e -> popup.show(slider, e.getScreenX(), e.getScreenY() + offset));
+        slider.setOnMouseExited(e -> popup.hide());
+
+        labelgroup1.setFont(new Font("Arial", 20.0));
+        labelgroup2.setFont(new Font("Arial", 20.0));
+
+        final ToggleGroup group = new ToggleGroup();
+        RadioButton rb1 = new RadioButton("NVG");
+        rb1.setToggleGroup(group);
+        rb1.setUserData("NVG");
+
+        RadioButton rb2 = new RadioButton("HVG");
+        rb2.setToggleGroup(group);
+        rb2.setUserData("HVG");
+
+        RadioButton rb3 = new RadioButton("Correlation network - undirected");
+        rb3.setToggleGroup(group);
+        rb3.setUserData("3rd");
+
+        RadioButton rb4 = new RadioButton("Correlation network - directed");
+        rb4.setToggleGroup(group);
+        rb4.setUserData("4th");
+
+        group.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+            public void changed(ObservableValue<? extends Toggle> ov,
+                    Toggle old_toggle, Toggle new_toggle) {
+                if (group.getSelectedToggle() != null) {
+                    if (group.getSelectedToggle() == rb1) {
+                        labelRange.setVisible(false);
+                        slider.setVisible(false);
+
+                        radioButtonValue = 1;
+                        System.out.println("Tlacidlo 1");
+                    } else if (group.getSelectedToggle() == rb2) {
+                        labelRange.setVisible(false);
+                        slider.setVisible(false);
+                        radioButtonValue = 2;
+                        System.out.println("Tlacidlo 2");
+                    } else if (group.getSelectedToggle() == rb3) {
+                        radioButtonValue = 3;
+                        labelRange.setVisible(true);
+                        slider.setVisible(true);
+                        System.out.println("Correlation network - undirected");
+                    } else if (group.getSelectedToggle() == rb4) {
+                        labelRange.setVisible(false);
+                        slider.setVisible(false);
+                        radioButtonValue = 4;
+                        System.out.println("Tlacidlo 4");
+                    }
+                }
+
+            }
+        });
+
+        labelRange.setVisible(false);
+        slider.setVisible(false);
+
+        slider.valueProperty().addListener((obs, oldval, newVal) -> {
+         //code
+         criticalValue = slider.getValue();
+         slider.setValue((newVal.doubleValue()));
+         System.out.println("Value"+criticalValue);
+         });
+         
+        final HBox hboxButtons = new HBox();
         hboxButtons.setMinWidth(Design.minTableWidth);
         hboxButtons.setSpacing(25);
-        
-        hboxButtons.getChildren().addAll(rb1, rb2, rb3);
-        
-        
+
+        hboxButtons.getChildren().addAll(rb1, rb2, rb3, rb4);
+
         final VBox vbox = new VBox();
         vbox.setSpacing(5);
         vbox.setPadding(new Insets(30, 0, 0, 930)); //TODO dynamicky
-        vbox.getChildren().addAll(separator1,labelRange,slider,labelRadioButton,hboxButtons, labelgroup1, hbox, createTable(table, 1), separator2, labelgroup2, hbox2, createTable(table2, 2), buttonSaveNetworkAsPNG);
+        vbox.getChildren().addAll(labelRange, slider, separator1, labelRadioButton, hboxButtons, labelgroup1, hbox, createTable(table, 1), separator2, labelgroup2, hbox2, createTable(table2, 2), buttonSaveNetworkAsPNG);
 
         root.getChildren().addAll(vbox);
-        
+
         GraphicsContext gc = canvas1.getGraphicsContext2D();
         gc.setFill(Color.CORNSILK);
         gc.setStroke(Color.BLUE);
@@ -346,13 +376,12 @@ public class TimeSeriesAnalysisTool extends Application {
             }
 
         });
-        
-          buttonSaveNetworkAsPNG.setOnAction((event) -> {
+
+        buttonSaveNetworkAsPNG.setOnAction((event) -> {
             // Button was clicked, do something...
             Actions a = new Actions();
             a.saveNetworkAsImage(canvas1, primaryStage);
-          });
-
+        });
 
     }
 
@@ -422,55 +451,52 @@ public class TimeSeriesAnalysisTool extends Application {
         MenuItem betweennessCentrality = new MenuItem("Betweenness centrality");
         betweennessCentrality.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-                ChartMaker ch= new ChartMaker();
-                ch.createChart("Betweenness centrality", network, range);           
+                ChartMaker ch = new ChartMaker();
+                ch.createChart("Betweenness centrality", network, 5);
             }
         });
 
         menuFile.getItems().addAll(betweennessCentrality);
-        
+
         MenuItem closenessCentrality = new MenuItem("Closeness centrality");
         closenessCentrality.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-                ChartMaker ch= new ChartMaker();
-                ch.createChart("Closeness centrality", network, range);
+                ChartMaker ch = new ChartMaker();
+                ch.createChart("Closeness centrality", network, 5);
             }
         });
         menuFile.getItems().addAll(closenessCentrality);
-        
+
         MenuItem motifsThreeVertices = new MenuItem("Motifs three vertices");
         motifsThreeVertices.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 /*ChartMaker ch= new ChartMaker();
-                ch.createChart("Closeness centrality", network, range);*/
-                ThreeVerticesMotifs tvm= new ThreeVerticesMotifs(network);
+                 ch.createChart("Closeness centrality", network, range);*/
+                ThreeVerticesMotifs tvm = new ThreeVerticesMotifs(network);
                 tvm.countMotifs();
             }
         });
         menuFile.getItems().addAll(motifsThreeVertices);
 
-        
         Menu layoutsMenu = new Menu("Layouts");
-        
+
         MenuItem itemISOMLayout = new MenuItem("ISOM Layout");
         itemISOMLayout.setOnAction((event) -> {
             System.out.println("ISOM layout");
-           runLayout(new LayoutISOM());
+            runLayout(new LayoutISOM());
         });
-        
+
         MenuItem itemCircularLayout = new MenuItem("Circular Layout");
         itemCircularLayout.setOnAction((event) -> {
-           runLayout(new LayoutCircular());
+            runLayout(new LayoutCircular());
         });
-        
+
         MenuItem itemKKLayout = new MenuItem("KK Layout");
         itemKKLayout.setOnAction((event) -> {
-           runLayout(new LayoutKK());
+            runLayout(new LayoutKK());
         });
-        layoutsMenu.getItems().addAll(itemCircularLayout,itemISOMLayout, itemKKLayout);
-        
-        
-        
+        layoutsMenu.getItems().addAll(itemCircularLayout, itemISOMLayout, itemKKLayout);
+
         Menu menu2 = new Menu("File");
         MenuItem exitItem = new MenuItem("Exit", null);
         exitItem.setMnemonicParsing(true);
@@ -478,24 +504,22 @@ public class TimeSeriesAnalysisTool extends Application {
         exitItem.setOnAction((event) -> {
             Platform.exit();
         });
-        
-       /* MenuItem saveItem = new MenuItem("Save network as PNG", null);
-        saveItem.setMnemonicParsing(true);
-        saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
-        saveItem.setOnAction((event) -> {
-            Actions a = new Actions();
-            a.saveNetworkAsImage(canvas1,transportStage );
-        });*/
+
+        /* MenuItem saveItem = new MenuItem("Save network as PNG", null);
+         saveItem.setMnemonicParsing(true);
+         saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
+         saveItem.setOnAction((event) -> {
+         Actions a = new Actions();
+         a.saveNetworkAsImage(canvas1,transportStage );
+         });*/
         menu2.getItems().add(exitItem);
 
-        menu.getMenus().addAll(menuFile,layoutsMenu, menu2);
+        menu.getMenus().addAll(menuFile, layoutsMenu, menu2);
 
         return menu;
 
     }
 
-  
-    
     private TableView createTable(TableView table, int id) {
 
         table.setMaxHeight(Design.maxTableHeight);
@@ -529,29 +553,24 @@ public class TimeSeriesAnalysisTool extends Application {
                                         System.out.println("Zlozka : " + myFile.getFirstName());
 
                                         String fileFromTableName = myFile.firstName.get(); //name of file which was clicked in tableview
-                                        
-                                        if(id==1)
-                                        {
-                                        for (File f : files) {
-                                            String fileToDraw = f.getName();
-                                            if (fileToDraw.equals(fileFromTableName)) {
-                                                System.out.println("Su zhodne a meno je " + f.getName());
-                                                displayLoading(f);
+
+                                        if (id == 1) {
+                                            for (File f : files) {
+                                                String fileToDraw = f.getName();
+                                                if (fileToDraw.equals(fileFromTableName)) {
+                                                    System.out.println("Su zhodne a meno je " + f.getName());
+                                                    displayLoading(f);
+                                                }
+                                            }
+                                        } else {
+                                            for (File f : files2) {
+                                                String fileToDraw = f.getName();
+                                                if (fileToDraw.equals(fileFromTableName)) {
+                                                    System.out.println("Su zhodne a meno je " + f.getName());
+                                                    displayLoading(f);
+                                                }
                                             }
                                         }
-                                        }
-                                        
-                                        else
-                                        {
-                                        for (File f : files2) {
-                                            String fileToDraw = f.getName();
-                                            if (fileToDraw.equals(fileFromTableName)) {
-                                                System.out.println("Su zhodne a meno je " + f.getName());
-                                                displayLoading(f);
-                                            }
-                                        }
-                                        }
-                                        
 
                                     });
                                     setGraphic(btn);
@@ -612,10 +631,6 @@ public class TimeSeriesAnalysisTool extends Application {
         return table;
     }
 
-    
-    
-    
-    
     public static class FilesToConvert {
 
         private final SimpleStringProperty firstName;
@@ -635,16 +650,13 @@ public class TimeSeriesAnalysisTool extends Application {
 
     }
 
-    
-    
     public void startTask(File f) {
         // Create a Runnable
         Runnable task = new Runnable() {
             public void run() {
-               
-                    runTask(f);
-                
-                
+
+                runTask(f);
+
             }
         };
 
@@ -659,16 +671,17 @@ public class TimeSeriesAnalysisTool extends Application {
     public void runTask(File f) {
 
         try {
-                // Get the Status
 
-            if(radioButtonValue==3)
-            {
-                network = new CorrelationNetwork().createCorrelationNetwork(f);
-            }
-            
-            else
+            if (radioButtonValue == 4) {
+                network = new CorrelationNetwork().createCorrelationNetwork(f, true, 0.8); //directed
+            } else if (radioButtonValue == 3) {
+                network = new CorrelationNetwork().createCorrelationNetwork(f, false, criticalValue); //undirected
+            } else if (radioButtonValue == 2) {
+
+            } else {
                 network = new NVG().createNVGNetwork(f);
-            
+            }
+
             GraphicsContext gc = canvas1.getGraphicsContext2D();
             gc.setFill(Color.WHITE);
             gc.fillRect(0, 0, Design.canvasWidth, Design.canvasHeight);
@@ -680,13 +693,22 @@ public class TimeSeriesAnalysisTool extends Application {
                     if (networkIsNull) {
                         break;
                     } else {
-                        Pair<Vertex> p = network.getEndpoints(e);
-                        Vertex v = p.getFirst();
-                        Vertex v2 = p.getSecond();
-                        drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), 0.1, Color.BLACK);
+
+                        if (network.getEdgeType(e) == DIRECTED) {
+                            Vertex v = network.getSource(e);
+                            Vertex v2 = network.getDest(e);
+
+                            drawDirectedEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), 0.1, Color.BLACK);
+
+                        } else {
+                            Pair<Vertex> p = network.getEndpoints(e);
+                            Vertex v = p.getFirst();
+                            Vertex v2 = p.getSecond();
+                            drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), 0.1, Color.BLACK);
+                            System.out.println("NEEEEEEEEEEEEEEEEEEEEEEEORIENTOVANY");
+                        }
 
                       //  System.out.println("Hrana z uzla: " + v.toString() + "na pozicii " + v.getPositionX() + " do uzla" + p.getSecond());
-
                     }
                 }
             }
@@ -716,7 +738,7 @@ public class TimeSeriesAnalysisTool extends Application {
                 @Override
                 public void run() {
                     loadingStage.hide();
-                        //loadingStage.close();
+                    //loadingStage.close();
 
                 }
             });
@@ -727,12 +749,12 @@ public class TimeSeriesAnalysisTool extends Application {
         }
 
     }
-    
-    
-    public void runLayout(final Layout layout){
-        if(network == null)
+
+    public void runLayout(final Layout layout) {
+        if (network == null) {
             return;
-        
+        }
+
         Task task = new Task() {
             @Override
             protected Object call() throws Exception {
@@ -745,52 +767,60 @@ public class TimeSeriesAnalysisTool extends Application {
         beginTask(task);
     }
 
-     public void beginTask(Task task){
+    public void beginTask(Task task) {
         Thread tr = new Thread(task);
         tr.setDaemon(true);
         tr.start();
     }
-     
-     public void drawNetwork(){
-        
-          GraphicsContext gc = canvas1.getGraphicsContext2D();
-            gc.setFill(Color.WHITE);
-            gc.fillRect(0, 0, Design.canvasWidth, Design.canvasHeight);
-            
+
+    public void drawNetwork() {
+
+        GraphicsContext gc = canvas1.getGraphicsContext2D();
+        gc.setFill(Color.WHITE);
+        gc.fillRect(0, 0, Design.canvasWidth, Design.canvasHeight);
+
         Platform.runLater(new Runnable() {
             @Override
-            public void run() {   
-                 for (Edge e : network.getEdges())
-                 {
-                      Pair<Vertex> p = network.getEndpoints(e);
-                        Vertex v = p.getFirst();
-                        Vertex v2 = p.getSecond();
-                        drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), 0.1, Color.BLACK);
-                 }
-                 
-                  for (Vertex v : network.getVertices()) {
+            public void run() {
+                for (Edge e : network.getEdges()) {
+                    Pair<Vertex> p = network.getEndpoints(e);
+                    Vertex v = p.getFirst();
+                    Vertex v2 = p.getSecond();
+                    drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), 0.1, Color.BLACK);
+                }
+
+                for (Vertex v : network.getVertices()) {
                     drawVertex(gc, v, Color.CHARTREUSE); //skontrolovat ci je spravne
                 }
-                  
-                 
-               }
+
+            }
         });
     }
-     
-     
-     void drawArrow(GraphicsContext gc, int x1, int y1, int x2, int y2) {
-    gc.setFill(Color.BLACK);
-int ARR_SIZE=8;
-    double dx = x2 - x1, dy = y2 - y1;
-    double angle = Math.atan2(dy, dx);
-    int len = (int) Math.sqrt(dx * dx + dy * dy);
 
-    Transform transform = Transform.translate(x1, y1);
-    transform = transform.createConcatenation(Transform.rotate(Math.toDegrees(angle), 0, 0));
-    gc.setTransform(new Affine(transform));
+    public void drawDirectedEdge(GraphicsContext gc, double fromX, double fromY, double toX, double toY, Color color) {
+        double difX = fromX - toX;
+        double difY = fromY - toY;
+        double difZ = Math.sqrt(difX * difX + difY * difY);
+        double shift = 10 / 2; //Vertex size
+        double newX = -(difX / difZ) * (difZ - shift) + fromX;
+        double newY = -(difY / difZ) * (difZ - shift) + fromY;
+        drawDirectedEdge(gc, fromX, fromY,
+                newX, newY, 0.1, color);
+    }
 
-    gc.strokeLine(0, 0, len, 0);
-    gc.fillPolygon(new double[]{len, len - ARR_SIZE, len - ARR_SIZE, len}, new double[]{0, -ARR_SIZE, ARR_SIZE, 0},
-            4);
-}
+    private void drawDirectedEdge(GraphicsContext gc, double fromX, double fromY, double toX, double toY, double edgeWidth, Color color) {
+        double angle = Math.atan2(fromY - toY, fromX - toX);
+        double tmp1 = angle + 0.17453;
+        double x1 = Math.cos(tmp1) * 15 + toX;
+        double y1 = Math.sin(tmp1) * 15 + toY;
+        double tmp2 = angle - 0.17453;
+        double x2 = Math.cos(tmp2) * 15 + toX;
+        double y2 = Math.sin(tmp2) * 15 + toY;
+        gc.setLineWidth(edgeWidth);
+        gc.setStroke(color);
+        gc.strokeLine(fromX, fromY, toX, toY);
+        gc.strokeLine(toX, toY, x1, y1);
+        gc.strokeLine(toX, toY, x2, y2);
+    }
+
 }
