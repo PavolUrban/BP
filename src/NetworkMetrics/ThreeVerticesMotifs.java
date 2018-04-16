@@ -23,7 +23,9 @@ import java.util.List;
 public class ThreeVerticesMotifs {
      private Graph<Vertex, Edge> network;
      Vertex vertex;
-     List<Vertex> connectedVertices;
+     List<Vertex> toRootconnectedVertices;
+     List<Vertex> toFirstLevelChildconnectedVertices;
+     List<Vertex> toSecondLevelChildconnectedVertices;
      
    
 
@@ -39,55 +41,71 @@ public class ThreeVerticesMotifs {
             allVertices.add(v);
         }
         orderVertices(allVertices);
-       
+        
+        
+        //urcime roota a oznacime ho visited
+        Vertex root = allVertices.get(2);
+        root.setisVisited(true);
+        System.out.println("Toto je root "+ root.toString() + " a "+root.getisVisited());
         
         
         
-        for(Vertex v : allVertices)
+        //najdeme potomkov a oznacime ich visited
+        toRootconnectedVertices = new ArrayList<Vertex>();
+        int i=0;
+        for(Vertex rootsChild : network.getNeighbors(root))
         {
-            Collection<Edge> connectedEdges = network.getIncidentEdges(v);
-            connectedVertices = new ArrayList<Vertex>();
-            
-            int i=0;
-            for(Edge e: connectedEdges)
-            {
-                /*pozor je tu aj spojenie 1-0 aj 0-1 atd*/
-                connectedVertices.add(network.getOpposite(v, e));
-                //System.out.println("Uzol " +v.toString() +" je spojeny s uzlom "+connectedVertices.get(i).toString() + "hranou s ID"+ e.getId());
-                i++;
-            }
-            
-           
-          orderVertices(connectedVertices);
-          System.out.println("Uzol "+v.toString()+" je spojeny s uzlami: ");
-           for(int sfasf=0;sfasf<connectedVertices.size();sfasf++)
-          {
-            System.out.println(sfasf+". ->"+connectedVertices.get(sfasf).toString());    
-          }
-           
-           
-           System.out.println();
-          for(int j=0;j<connectedVertices.size();j++)
-          {
-              for(int k=j+1;k<connectedVertices.size();k++)
-              {
-                  Vertex first =connectedVertices.get(j);
-                  Vertex second = connectedVertices.get(k);
-                  if(network.isNeighbor(first, second))
-                  {
-                   System.out.println("Vznikol trojuholník "+v.toString()+"-"+ first.toString() + "-"+second.toString());
-                  }
-                  else
-                  {
-                      System.out.println("Tieto dva nie su spojene "+ first.toString() + " a "+second.toString());
-                  }
-              }
-          }
-            
-          
-            System.out.println("-------------------------------------------------");
-            
+            toRootconnectedVertices.add(rootsChild); 
+            rootsChild.setisVisited(true);
+            i++;
         }
+        orderVertices(toRootconnectedVertices);
+      
+        
+        
+       System.out.println("Uzol root"+root.toString()+" je "+ root.getisVisited() +" a je spojeny s uzlami: ");
+       System.out.println();
+       
+      toFirstLevelChildconnectedVertices = new ArrayList<Vertex>();
+       for(Vertex firstLevelChild: toRootconnectedVertices)
+       {
+           System.out.println("\t"+root.toString()+"-> "+firstLevelChild.toString()+", ktory dalej susedi s: ");
+           for(Vertex asda : network.getNeighbors(firstLevelChild))
+           {
+               if(asda.getisVisited()== true)
+               {    
+                    System.out.println("\t\t"+firstLevelChild.toString()+" ->"+asda.toString()+" UZ JE VISITED");
+               }
+               else
+               {
+                   toFirstLevelChildconnectedVertices.add(asda);
+                   asda.setisVisited(true);
+                   System.out.println("\t\t"+firstLevelChild.toString()+" ->"+asda.toString()+", ktory je "+asda.getisVisited());
+               }
+               
+               //tu zoradit
+           }
+           //System.out.println("     -"+v.toString()+", ktory je "+v.getisVisited());
+           
+       }
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       System.out.println();
+       for(Vertex v:allVertices)
+       {
+           System.out.println(v.toString()+" a ten je "+v.getisVisited());
+       }
+       
+      
     }
     
     private void orderVertices(List<Vertex> vertices)

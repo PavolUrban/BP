@@ -68,7 +68,7 @@ public class NVG {
                 if(edge){    
                     
                     graph.addEdge(new Edge(edgeID), vertices[i], vertices[j]);
-                    System.out.println("Hrana medzi uzlami: "+ vertices[i].toString()+" a "+vertices[j].toString()+" a id hrany je "+edgeID);
+                    System.out.println("Som v triede NVG Hrana medzi uzlami: "+ vertices[i].toString()+" a "+vertices[j].toString()+" a id hrany je "+edgeID);
                     edgeID++;
                     
                 }

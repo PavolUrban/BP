@@ -96,6 +96,8 @@ import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import timeseriesanalysistool.GUI.Alert;
+import timeseriesanalysistool.GUI.ChartCreator;
 import timeseriesanalysistool.GUI.ChartMaker;
 import timeseriesanalysistool.GUI.Design;
 
@@ -264,11 +266,11 @@ public class TimeSeriesAnalysisTool extends Application {
         rb2.setToggleGroup(group);
         rb2.setUserData("HVG");
 
-        RadioButton rb3 = new RadioButton("Correlation network - undirected");
+        RadioButton rb3 = new RadioButton("Correlation network");
         rb3.setToggleGroup(group);
         rb3.setUserData("3rd");
 
-        RadioButton rb4 = new RadioButton("Correlation network - directed");
+        RadioButton rb4 = new RadioButton("Reccurence network");
         rb4.setToggleGroup(group);
         rb4.setUserData("4th");
 
@@ -451,8 +453,16 @@ public class TimeSeriesAnalysisTool extends Application {
         MenuItem betweennessCentrality = new MenuItem("Betweenness centrality");
         betweennessCentrality.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-                ChartMaker ch = new ChartMaker();
-                ch.createChart("Betweenness centrality", network, 5);
+                 if(network != null )
+                {
+                    ChartMaker ch = new ChartMaker();
+                ch.createChart("Betweenness centrality", network, 5000);  
+                }
+                 else
+                 {    Alert a = new Alert();
+                    a.displayAlert("It is not possible to count betweennes centrality\n"+ "because no network was chosen");
+                 }
+                
             }
         });
 
@@ -461,8 +471,17 @@ public class TimeSeriesAnalysisTool extends Application {
         MenuItem closenessCentrality = new MenuItem("Closeness centrality");
         closenessCentrality.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-                ChartMaker ch = new ChartMaker();
-                ch.createChart("Closeness centrality", network, 5);
+                if(network != null )
+                {
+                    ChartMaker ch = new ChartMaker();
+                    ch.createChart("Closeness centrality", network, 100);
+                }
+                else
+                {
+                    Alert a = new Alert();
+                    a.displayAlert("It is not possible to count closeness centrality\n"+"because no network was chosen");
+                }
+                
             }
         });
         menuFile.getItems().addAll(closenessCentrality);
@@ -477,6 +496,16 @@ public class TimeSeriesAnalysisTool extends Application {
             }
         });
         menuFile.getItems().addAll(motifsThreeVertices);
+        
+          MenuItem itemDegree = new MenuItem("Degree");
+        itemDegree.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+               ChartMaker ch = new ChartMaker();
+                    ch.createChart("Degree", network, 2);
+            }
+        });
+        menuFile.getItems().addAll(itemDegree);
+        
 
         Menu layoutsMenu = new Menu("Layouts");
 
@@ -495,6 +524,8 @@ public class TimeSeriesAnalysisTool extends Application {
         itemKKLayout.setOnAction((event) -> {
             runLayout(new LayoutKK());
         });
+        
+        
         layoutsMenu.getItems().addAll(itemCircularLayout, itemISOMLayout, itemKKLayout);
 
         Menu menu2 = new Menu("File");
@@ -666,6 +697,8 @@ public class TimeSeriesAnalysisTool extends Application {
         backgroundThread.setDaemon(true);
         // Start the thread
         backgroundThread.start();
+        
+      
     }
 
     public void runTask(File f) {
@@ -747,6 +780,7 @@ public class TimeSeriesAnalysisTool extends Application {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+         
 
     }
 
@@ -765,12 +799,14 @@ public class TimeSeriesAnalysisTool extends Application {
             }
         };
         beginTask(task);
+       
     }
 
     public void beginTask(Task task) {
         Thread tr = new Thread(task);
         tr.setDaemon(true);
         tr.start();
+      
     }
 
     public void drawNetwork() {

@@ -9,12 +9,17 @@
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/TimeSeriesAnalysisTool/src/Layouts/LayoutISOM.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/TimeSeriesAnalysisTool/src/timeseriesanalysistool/GUI/ChartMaker.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/TimeSeriesAnalysisTool/src/Actions/Actions.java</file>
+            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/TimeSeriesAnalysisTool/src/NetworkMetrics/Closennes.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/TimeSeriesAnalysisTool/src/timeseriesanalysistool/TimeSeriesAnalysisTool.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/TimeSeriesAnalysisTool/src/NetworkMetrics/Betweenness.java</file>
+            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/TimeSeriesAnalysisTool/src/NetworkMetrics/Degreee.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/TimeSeriesAnalysisTool/src/Algorithms/NVG.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/TimeSeriesAnalysisTool/src/Layouts/LayoutKK.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/TimeSeriesAnalysisTool/src/Layouts/Layout.java</file>
+            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/TimeSeriesAnalysisTool/src/NetworkMetrics/ThreeVerticesMotifs.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/TimeSeriesAnalysisTool/src/Layouts/LayoutCircular.java</file>
+            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/TimeSeriesAnalysisTool/src/NetworkMetrics/NetworkSubgraphs.java</file>
+            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/TimeSeriesAnalysisTool/src/timeseriesanalysistool/GUI/ChartCreator.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/TimeSeriesAnalysisTool/src/NetworkComponents/Vertex.java</file>
         </group>
     </open-files>

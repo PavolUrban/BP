@@ -18,6 +18,7 @@ public class Vertex {
     private double positionX;
     private double positionY;
     private double size = 10;
+    private Boolean isVisited;
     
     private double revValue = -1;
     private String revChange = "";
@@ -32,6 +33,7 @@ public class Vertex {
         Random r = new Random();
         this.positionX = r.nextInt(Design.canvasWidth)-5; //este upravit
         this.positionY = r.nextInt(Design.canvasHeight)-5;
+        this.isVisited =false;
     }
     
     public Vertex(int id, String label, double positionX, double positionY) {
@@ -94,6 +96,17 @@ public class Vertex {
 
     public void setRevChange(String revChange) {
         this.revChange = revChange;
+    }
+    
+    public void setisVisited(Boolean visited)
+    {
+        this.isVisited = visited;
+    }
+    
+    public Boolean getisVisited()
+    {
+        
+        return this.isVisited;
     }
     
 }
