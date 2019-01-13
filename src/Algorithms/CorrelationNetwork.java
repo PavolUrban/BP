@@ -30,25 +30,23 @@ public class CorrelationNetwork {
     public static final String ANSI_YELLOW_BACKGROUND = "\u001B[43m";
 
     private int lengthOfSegment = 5;
-
+/*
     public void setLengthOfSegment(int length) {
         this.lengthOfSegment = length;
     }
+*/
+    public Graph<Vertex, Edge> createCorrelationNetwork(File file, boolean typeOfGraph, double criticalValue, int lengthOfSegment) {
 
-    public Graph<Vertex, Edge> createCorrelationNetwork(File file, boolean typeOfGraph, double criticalValue) {
-
+        this.lengthOfSegment = lengthOfSegment;
         ArrayList<Double> values = new ArrayList<>();
         BufferedReader br = null;
         try {
             br = new BufferedReader(new FileReader(file));
-            try {
-                while (br.ready()) {
+
+            while (br.ready()) {
                     values.add(Double.parseDouble(br.readLine()));
                 }
-            } catch (IOException ex) {
-                System.err.println("File error");
-            }
-        } catch (FileNotFoundException ex) {
+        } catch (IOException ex) {
             System.err.println("File not found.");
         } finally {
             if (br != null) {
@@ -140,9 +138,9 @@ public class CorrelationNetwork {
                 double downsideResult = Math.sqrt(downsideLeftPart) * Math.sqrt(downsideRightPart);
 
                 double finalResult = upside / downsideResult;
-                System.out.println("Kontrolujem uzol " + constantPointer + " s " + as);
+                //System.out.println("Kontrolujem uzol " + constantPointer + " s " + as);
 
-                if (isDirected) {
+               /* if (isDirected) {
                     if (finalResult > 0.7 && finalResult <= 1) {
                         System.out.println(ANSI_GREEN_BACKGROUND + "Finalny vysledok" + finalResult);
                         graph.addEdge(new Edge(edgeID), vertices[constantPointer], vertices[as], EdgeType.DIRECTED);
@@ -153,25 +151,23 @@ public class CorrelationNetwork {
                         graph.addEdge(new Edge(edgeID), vertices[as], vertices[constantPointer], EdgeType.DIRECTED);
                         edgeID++;
                     } else {
-                        System.out.println(ANSI_YELLOW_BACKGROUND + "Finalny vysledok" + finalResult);
+                        //System.out.println(ANSI_YELLOW_BACKGROUND + "Finalny vysledok" + finalResult);
                     }
 
-                }
+                }*/
                 
-                else
-                {
                     double finalResultAbsoluteValue = Math.abs(finalResult);
                     if(finalResultAbsoluteValue>criticalValue) //critical value
                     {
-                        System.out.println(ANSI_GREEN_BACKGROUND+"Hodnota bolla "+ finalResult+ " po zaokruhleni "+finalResultAbsoluteValue);
+                        //System.out.println(ANSI_GREEN_BACKGROUND+"Hodnota bolla "+ finalResult+ " po zaokruhleni "+finalResultAbsoluteValue);
                         graph.addEdge(new Edge(edgeID), vertices[constantPointer], vertices[as], EdgeType.UNDIRECTED);
                     }
                     else
                     {
-                        System.out.println(ANSI_RED_BACKGROUND+"Hodnota bolla "+ finalResult+ " po zaokruhleni "+finalResultAbsoluteValue);
+                        //System.out.println(ANSI_RED_BACKGROUND+"Hodnota bolla "+ finalResult+ " po zaokruhleni "+finalResultAbsoluteValue);
                     }
         
-                }
+                
 
                 upside = 0.0;
                //System.out.println(ANSI_RED_BACKGROUND+ "Beriem uzol "+ constantPointer +"/"+graph.getVertexCount()+ " a zistujem jeho spojenie s "+ as+"/"+graph.getVertexCount()); 
@@ -187,3 +183,4 @@ public class CorrelationNetwork {
     }
 
 }
+

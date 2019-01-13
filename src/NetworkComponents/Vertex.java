@@ -31,8 +31,8 @@ public class Vertex {
         this.id = id;
         this.label = label;
         Random r = new Random();
-        this.positionX = r.nextInt(Design.canvasWidth)-5; //este upravit
-        this.positionY = r.nextInt(Design.canvasHeight)-5;
+        this.positionX = r.nextInt(Design.canvasWidth-30); //este upravit
+        this.positionY = r.nextInt(Design.canvasHeight-30);
         this.isVisited =false;
     }
     

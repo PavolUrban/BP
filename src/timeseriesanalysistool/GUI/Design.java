@@ -19,7 +19,15 @@ public class Design {
     
     
     public static int minTableWidth=600; //todo ziskat dynamicky z pomeru
-    public static int maxTableHeight= 200; 
+    public static int maxTableHeight= 340; 
     
     public static int minTableColumnWidth=minTableWidth/3;
+    
+    public static int a=0;
+    
+    
+    public static int currentVertex=0;
+  
+
+
 }

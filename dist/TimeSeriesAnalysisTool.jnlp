@@ -8,7 +8,7 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="TimeSeriesAnalysisTool.jar" size="63967" download="eager" />
+    <jar href="TimeSeriesAnalysisTool.jar" size="117051" download="eager" />
     <jar href="lib\collections-generic-4.01.jar" size="531557" download="eager" />
     <jar href="lib\colt-1.2.0.jar" size="581945" download="eager" />
     <jar href="lib\concurrent-1.3.4.jar" size="189284" download="eager" />
@@ -23,6 +23,8 @@
     <jar href="lib\jung-jai-samples-2.0.1.jar" size="46790" download="eager" />
     <jar href="lib\jung-samples-2.0.1.jar" size="811841" download="eager" />
     <jar href="lib\jung-visualization-2.0.1.jar" size="324398" download="eager" />
+    <jar href="lib\poi-3.17.jar" size="2701171" download="eager" />
+    <jar href="lib\poi-ooxml-3.9.jar" size="936648" download="eager" />
     <jar href="lib\stax-api-1.0.1.jar" size="26514" download="eager" />
     <jar href="lib\vecmath-1.3.1.jar" size="289881" download="eager" />
     <jar href="lib\wstx-asl-3.2.6.jar" size="520389" download="eager" />

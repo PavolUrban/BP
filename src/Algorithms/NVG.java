@@ -17,6 +17,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import timeseriesanalysistool.GUI.Design;
+import timeseriesanalysistool.GUI.MyAlerts;
 
 /**
  *
@@ -33,7 +35,7 @@ public class NVG {
             try {
                 while(br.ready())
                     values.add(Double.parseDouble(br.readLine()));
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 System.err.println("File error");
             }
         } catch (FileNotFoundException ex) {
@@ -48,12 +50,12 @@ public class NVG {
         }
         if(values.isEmpty())
             return null;
-        return createNet(values);
+        return createNet(values,file);
     }
   
 
     
-    private Graph<Vertex,Edge> createNet(ArrayList<Double> series){
+    private Graph<Vertex,Edge> createNet(ArrayList<Double> series, File f){
         int edgeID=0;
         Graph<Vertex,Edge> graph = initVertices(series.size());
         for(int i = 0; i < series.size(); i++){
@@ -68,16 +70,16 @@ public class NVG {
                 if(edge){    
                     
                     graph.addEdge(new Edge(edgeID), vertices[i], vertices[j]);
-                    System.out.println("Som v triede NVG Hrana medzi uzlami: "+ vertices[i].toString()+" a "+vertices[j].toString()+" a id hrany je "+edgeID);
+                    System.out.println("Som v triede NVG, pracujem na subore"+f.getName() + "Hrana medzi uzlami: "+ vertices[i].toString()+" a "+vertices[j].toString()+" a id hrany je "+edgeID);
                     edgeID++;
                     
                 }
             }
         }
-        int a = 0;
         
         
         
+        Design.a++;
         return graph;
     }
     

@@ -11,6 +11,7 @@ import edu.uci.ics.jung.algorithms.scoring.BetweennessCentrality;
 import edu.uci.ics.jung.graph.Graph;
 import java.util.ArrayList;
 import javafx.util.Pair;
+import timeseriesanalysistool.GUI.Design;
 
 /**
  *
@@ -28,8 +29,12 @@ public class Betweenness {
     public void count() {
         BetweennessCentrality centrality = new BetweennessCentrality(network);
         scores = new ArrayList<>();
+        int a=0;
         for(Vertex v : network.getVertices()){
+            System.out.println(a+ ". som v betweennes na uzle"+ v.toString());
             scores.add(new Pair(v, centrality.getVertexScore(v)));
+            a++;
+            Design.currentVertex++;
         }
     }
     
